@@ -14,7 +14,7 @@
 
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random, util, sys
 
 from game import Agent
 from pacman import GameState
@@ -75,8 +75,29 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
-
+        from util import manhattanDistance
+        
+        ghostpos = successorGameState.getGhostPositions()       
+        for pos in ghostpos:
+            if (newPos == ghostpos or manhattanDistance(pos, newPos) < 2) and newScaredTimes:
+                
+                return -sys.maxsize #return a very small number cause > numbers preaferable 
+            
+            elif (newPos == ghostpos or manhattanDistance(pos, newPos) < 2) and not newScaredTimes:               
+                return -sys.maxsize / 2                            
+        
+        currentfood = currentGameState.getFood()
+        foodlist = currentfood.asList()
+        fooddist = []
+        fooddist.append(sys.maxsize)
+        for f in foodlist:
+            fooddist.append(manhattanDistance(f, newPos))
+            
+        return successorGameState.getScore() - min(fooddist)
+                  
+            
+            
+            
 def scoreEvaluationFunction(currentGameState: GameState):
     """
     This default evaluation function just returns the score of the state.
@@ -136,6 +157,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
+        
+        
+        
+        
+        
+        
+        
         util.raiseNotDefined()
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
