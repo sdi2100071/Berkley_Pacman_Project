@@ -286,11 +286,11 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         pacman = 0    
         
-        optimalAction, opteval = self.minimax(gameState, 0, pacman) 
+        optimalAction, opteval = self.expectimax(gameState, 0, pacman) 
         return optimalAction
     
         
-    def minimax(self, gameState, depth, agent):
+    def expectimax(self, gameState, depth, agent):
         
         pacman = 0
         agentnum = gameState.getNumAgents()
@@ -308,7 +308,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             for action in actions:                              
                 
                 nextState = gameState.generateSuccessor(agent, action)
-                bestAction,eval = self.minimax(nextState, depth, agent + 1)
+                bestAction,eval = self.expectimax(nextState, depth, agent + 1)
                 opteval = max(eval, opteval)
                
                 if  eval == opteval:
@@ -322,7 +322,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                
                 for action in actions:
                     nextstate = gameState.generateSuccessor(agent, action) 
-                    bestaction,eval = self.minimax(nextstate, depth, agent + 1)
+                    bestaction,eval = self.expectimax(nextstate, depth, agent + 1)
                     opteval += eval * prob
                     optimalAction = action
                     
