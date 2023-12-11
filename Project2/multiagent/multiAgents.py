@@ -210,10 +210,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                
           
         
-                   
-        
-        
-
+                
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
     Your minimax agent with alpha-beta pruning (question 3)
@@ -224,7 +221,55 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        pacman = 0
+        optimalAction, opteval = self.alpha_beta(gameState, -float('inf'), float('inf'), 0, pacman)  # Get the action and score for pacman (max)
+        return optimalAction
+        
+    def alpha_beta(self, gameState, alpha,beta,  depth, agent):
+    
+        pacman = 0
+        agentnum = gameState.getNumAgents()
+        if agent == agentnum:
+            depth += 1
+            agent = pacman
+        
+        if gameState.isWin() or gameState.isLose() or  depth == self.depth:
+            return Directions.STOP,self.evaluationFunction(gameState)
+        
+        if agent == pacman:   
+                                                
+            actions = gameState.getLegalActions(0)
+            opteval = - sys.maxsize                   
+            for action in actions:   
+                                
+                nextState = gameState.generateSuccessor(agent, action)
+                bestAction,eval = self.alpha_beta(nextState, alpha, beta, depth, agent + 1)
+                opteval = max(eval, opteval)
+                if  eval == opteval:
+                    optimalAction = action 
+                     
+                alpha = max(alpha, opteval)
+                if alpha > beta:
+                    break
+        else:
+            
+            opteval = sys.maxsize
+            actions = gameState.getLegalActions(agent)                
+            for action in actions:
+                
+                nextstate = gameState.generateSuccessor(agent, action) 
+                bestaction,eval = self.alpha_beta(nextstate,alpha, beta, depth, agent + 1)
+                opteval = min(eval, opteval)
+                
+                if  eval == opteval:
+                    optimalAction = action
+                    
+                beta = min(beta, opteval)
+                if alpha > beta:
+                    break
+            
+        return optimalAction,opteval
+            
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -239,7 +284,55 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        pacman = 0    
+        
+        optimalAction, opteval = self.minimax(gameState, 0, pacman) 
+        return optimalAction
+    
+        
+    def minimax(self, gameState, depth, agent):
+        
+        pacman = 0
+        agentnum = gameState.getNumAgents()
+        if agent == agentnum:
+            depth += 1
+            agent = pacman
+        
+        if gameState.isWin() or gameState.isLose() or  depth == self.depth:
+            return Directions.STOP,self.evaluationFunction(gameState)
+        
+        if agent == pacman:                                        
+            actions = gameState.getLegalActions(0)
+            opteval = - sys.maxsize  
+    
+            for action in actions:                              
+                
+                nextState = gameState.generateSuccessor(agent, action)
+                bestAction,eval = self.minimax(nextState, depth, agent + 1)
+                opteval = max(eval, opteval)
+               
+                if  eval == opteval:
+                    optimalAction = action  
+        else:
+            
+            opteval = 0.0
+            actions = gameState.getLegalActions(agent) 
+            if len(actions) is not 0:  
+                prob = 1.0 / len(actions)                   
+               
+                for action in actions:
+                    nextstate = gameState.generateSuccessor(agent, action) 
+                    bestaction,eval = self.minimax(nextstate, depth, agent + 1)
+                    opteval += eval * prob
+                    optimalAction = action
+                    
+            else:    
+                          
+                opteval = 0.0
+                optimalAction = Directions.STOP        
+            
+        return optimalAction,opteval
+        
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
