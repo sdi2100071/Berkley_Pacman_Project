@@ -317,7 +317,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             
             opteval = 0.0
             actions = gameState.getLegalActions(agent) 
-            if len(actions) is not 0:  
+            if len(actions) != 0:  
                 prob = 1.0 / len(actions)                   
                
                 for action in actions:
@@ -342,7 +342,88 @@ def betterEvaluationFunction(currentGameState: GameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from util import manhattanDistance
+    
+    #objects that affect my evaluation value
+    pos = currentGameState.getPacmanPosition()
+    ghostpos = currentGameState.getGhostPositions()
+    food = currentGameState.getFood()
+    foodList = food.asList()
+    capsules = currentGameState.getCapsules()  
+    
+    ghostStates = currentGameState.getGhostStates()
+    eval = currentGameState.getScore()
+    
+    if currentGameState.isWin() :
+        return float('inf')
+    if currentGameState.isLose() :
+        return - float('inf')
+    #prefer state with more capsules
+    eval += -1.5 * len(capsules)
+    
+    scaredGhosts = [ghostState.scaredTimer for ghostState in ghostStates]
+    notscaredGhosts = [not ghostState.scaredTimer for ghostState in ghostStates]
+    
+    eval += -3.5 * len(scaredGhosts)
+    
+    eval += -3* len(scaredGhosts)
+    
+    eval += -0.5 * len(foodList)
+    
+    fooddist = []
+    fooddist.append(sys.maxsize)
+    for f in foodList:
+        fooddist.append(manhattanDistance(f, pos))
+    mindist = min(fooddist)
+    
+    if mindist != sys.maxsize:
+        eval += - 0.5 * mindist
+    
+    
+    return eval
+    
+    
+    
+    
+    
+    
+    
+    
+    # eval -= 0.5*food.count() # decrease with c*(food number) as least it is as good it is. c = eiler_num
+    # eval -= 1.5*len(ghostStates)
+    
+    # min_dist = sys.maxsize
+    # # save distance between pacman and nearest food
+    # for f in food.asList():
+    #     min_dist = min(min_dist, manhattanDistance(pos,f))
 
+    # # if there is no food left, we dont need to chane eval
+    # if min_dist != sys.maxsize:eval -= 0.5*min_dist
+    
+    
+    
+    
+    # currentfood = currentGameState.getFood()
+    # foodlist = currentfood.asList()
+    # fooddist = []
+    # fooddist.append(sys.maxsize)
+    # for f in foodlist:
+    #     fooddist = manhattanDistance(f, pos)
+    #     if fooddist <= 1:
+    #         myeval += -10 * fooddist
+    #     elif fooddist in range(2,8):
+    #         myeval += -15 * fooddist
+    #     else:
+    #         myeval += - 30 * fooddist
+            
+            
+            
+            
+    
+    
+    return currentGameState.getScore() - 100
+    
+    
+    
 # Abbreviation
 better = betterEvaluationFunction
