@@ -79,16 +79,19 @@ class ReflexAgent(Agent):
         
         ghostpos = successorGameState.getGhostPositions()       
         for pos in ghostpos:
-            if (newPos == ghostpos or manhattanDistance(pos, newPos) < 2) and newScaredTimes:
-                return -sys.maxsize #return a very small number cause > numbers preaferable 
-            
-            elif (newPos == ghostpos or manhattanDistance(pos, newPos) < 2) and not newScaredTimes:               
+            #if pacman's next move collisions on ghosts position and not scared return a very small num to avoid that
+            if (newPos == ghostpos or manhattanDistance(pos, newPos) < 2) and not newScaredTimes: 
+                return -sys.maxsize 
+            #else return a smaller than the previous num but still small cause its not preferable
+            elif (newPos == ghostpos or manhattanDistance(pos, newPos) < 2) and  newScaredTimes:               
                 return -sys.maxsize / 2                            
-        
+            
         currentfood = currentGameState.getFood()
         foodlist = currentfood.asList()
         fooddist = []
         fooddist.append(sys.maxsize)
+        #find the closest food to pacman  and return the score - min distance because we prefer the state with the state were pacman is closer
+        # score - min(minfooddistance) more preferable --> return value larger
         for f in foodlist:
             fooddist.append(manhattanDistance(f, newPos))
             
@@ -161,11 +164,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
         #maximazer--->pacman = 0
         #minimazers-->ghosts >= 1
         
-        #pacman plays first   
-        
+        #pacman plays first      
         pacman = 0    
-        
-        optimalAction, opteval = self.minimax(gameState, 0, pacman) 
+        optimalAction, opteval = self.minimax(gameState, 0, pacman) #call the minimax with depth 0 
         return optimalAction
     
         
@@ -173,9 +174,11 @@ class MinimaxAgent(MultiAgentSearchAgent):
         
         pacman = 0
         agentnum = gameState.getNumAgents()
-        if agent == agentnum:
-            depth += 1
-            agent = pacman
+        
+        #if we explored all agents --> 
+        if agent == agentnum: 
+            depth += 1      #go deeper
+            agent = pacman  #start from pacman    
         
         if gameState.isWin() or gameState.isLose() or  depth == self.depth:
             return Directions.STOP,self.evaluationFunction(gameState)
@@ -183,20 +186,19 @@ class MinimaxAgent(MultiAgentSearchAgent):
         if agent == pacman:   
                                                 
             actions = gameState.getLegalActions(0)
-            opteval = - sys.maxsize  
-                   
+            opteval = - sys.maxsize  #optimal evaluation value      
             for action in actions:   
-                               
+                
                 nextState = gameState.generateSuccessor(agent, action)
-                bestAction,eval = self.minimax(nextState, depth, agent + 1)
-                opteval = max(eval, opteval)
+                #call minimazer               
+                bestAction,eval = self.minimax(nextState, depth, agent + 1)                
+                opteval = max(eval, opteval)    #select max evaluation value of minimazers options
                 if  eval == opteval:
-                    optimalAction = action  
+                    optimalAction = action  #keep actions that leed to the max evaluation val
         else:
             
-            opteval = sys.maxsize
-            actions = gameState.getLegalActions(agent)
-                    
+            opteval = sys.maxsize 
+            actions = gameState.getLegalActions(agent)                
             for action in actions:
                
                 nextstate = gameState.generateSuccessor(agent, action) 
@@ -222,7 +224,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         pacman = 0
-        optimalAction, opteval = self.alpha_beta(gameState, -float('inf'), float('inf'), 0, pacman)  # Get the action and score for pacman (max)
+        optimalAction, opteval = self.alpha_beta(gameState, -float('inf'), float('inf'), 0, pacman) 
         return optimalAction
         
     def alpha_beta(self, gameState, alpha,beta,  depth, agent):
@@ -246,9 +248,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 bestAction,eval = self.alpha_beta(nextState, alpha, beta, depth, agent + 1)
                 opteval = max(eval, opteval)
                 if  eval == opteval:
-                    optimalAction = action 
-                     
+                    optimalAction = action                     
                 alpha = max(alpha, opteval)
+                
                 if alpha > beta:
                     break
         else:
@@ -262,9 +264,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 opteval = min(eval, opteval)
                 
                 if  eval == opteval:
-                    optimalAction = action
-                    
+                    optimalAction = action                   
                 beta = min(beta, opteval)
+               
                 if alpha > beta:
                     break
             
@@ -284,8 +286,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        pacman = 0    
-        
+        pacman = 0       
         optimalAction, opteval = self.expectimax(gameState, 0, pacman) 
         return optimalAction
     
@@ -318,16 +319,14 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             opteval = 0.0
             actions = gameState.getLegalActions(agent) 
             if len(actions) != 0:  
-                prob = 1.0 / len(actions)                   
+                probability = 1.0 / len(actions)    # probability -= 1 / number of actions                
                
                 for action in actions:
                     nextstate = gameState.generateSuccessor(agent, action) 
                     bestaction,eval = self.expectimax(nextstate, depth, agent + 1)
-                    opteval += eval * prob
-                    optimalAction = action
-                    
-            else:    
-                          
+                    opteval += eval * probability
+                    optimalAction = action                 
+            else:                        
                 opteval = 0.0
                 optimalAction = Directions.STOP        
             
@@ -358,70 +357,32 @@ def betterEvaluationFunction(currentGameState: GameState):
         return float('inf')
     if currentGameState.isLose() :
         return - float('inf')
+    
     #prefer state with more capsules
     eval += -1.5 * len(capsules)
     
+    # scaredGhosts: list of scared ghosts
     scaredGhosts = [ghostState.scaredTimer for ghostState in ghostStates]
+    # scaredGhosts: list of non scared ghosts
     notscaredGhosts = [not ghostState.scaredTimer for ghostState in ghostStates]
     
-    eval += -3.5 * len(scaredGhosts)
+    # prefere states with less scared ghosts 
+    eval += -3.5 * len(scaredGhosts) 
+    eval += -3* len(notscaredGhosts)
     
-    eval += -3* len(scaredGhosts)
-    
+    #prefer states with more food
     eval += -0.5 * len(foodList)
     
+    #prefer states were pacman is closer to food
     fooddist = []
     fooddist.append(sys.maxsize)
     for f in foodList:
         fooddist.append(manhattanDistance(f, pos))
-    mindist = min(fooddist)
-    
-    if mindist != sys.maxsize:
-        eval += - 0.5 * mindist
-    
+        mindist = min(fooddist)
+    eval += - 0.3* mindist
     
     return eval
     
-    
-    
-    
-    
-    
-    
-    
-    # eval -= 0.5*food.count() # decrease with c*(food number) as least it is as good it is. c = eiler_num
-    # eval -= 1.5*len(ghostStates)
-    
-    # min_dist = sys.maxsize
-    # # save distance between pacman and nearest food
-    # for f in food.asList():
-    #     min_dist = min(min_dist, manhattanDistance(pos,f))
-
-    # # if there is no food left, we dont need to chane eval
-    # if min_dist != sys.maxsize:eval -= 0.5*min_dist
-    
-    
-    
-    
-    # currentfood = currentGameState.getFood()
-    # foodlist = currentfood.asList()
-    # fooddist = []
-    # fooddist.append(sys.maxsize)
-    # for f in foodlist:
-    #     fooddist = manhattanDistance(f, pos)
-    #     if fooddist <= 1:
-    #         myeval += -10 * fooddist
-    #     elif fooddist in range(2,8):
-    #         myeval += -15 * fooddist
-    #     else:
-    #         myeval += - 30 * fooddist
-            
-            
-            
-            
-    
-    
-    return currentGameState.getScore() - 100
     
     
     
