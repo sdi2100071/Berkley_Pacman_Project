@@ -252,7 +252,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 alpha = max(alpha, opteval)
                 
                 if alpha > beta:
-                    break
+                    return optimalAction,opteval
         else:
             
             opteval = sys.maxsize
@@ -268,7 +268,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 beta = min(beta, opteval)
                
                 if alpha > beta:
-                    break
+                    return optimalAction,opteval
             
         return optimalAction,opteval
             
