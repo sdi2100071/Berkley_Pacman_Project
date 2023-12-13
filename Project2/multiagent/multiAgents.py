@@ -13,7 +13,7 @@
 
 
 from util import manhattanDistance
-from game import Directions
+from game import Directions     
 import random, util, sys
 
 from game import Agent
